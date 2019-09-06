@@ -1,5 +1,7 @@
 ﻿using AspNetCoreIdentity.Config;
 using AspNetCoreIdentity.Modulos.Identity.Data;
+using KissLog.Apis.v1.Listeners;
+using KissLog.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -40,6 +42,7 @@ namespace AspNetCoreIdentity
             services.AddIdentityConfig(Configuration);
             services.AddAuthorizationConfig();
             services.ResolveDependencies();
+            services.AddKissLoggerConfig();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -52,15 +55,20 @@ namespace AspNetCoreIdentity
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                //Tratamento de erro
+                app.UseExceptionHandler("/erro/500");
+                app.UseStatusCodePagesWithRedirects("/erro/{0}");
                 app.UseHsts();
             }
-
+            
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
             app.UseAuthentication();
+
+            new KissLoggerConfiguration().RegisterKissLoggerListeners(Configuration, app);
 
             app.UseMvc(routes =>
             {
